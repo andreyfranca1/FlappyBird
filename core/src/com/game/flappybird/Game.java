@@ -2,6 +2,7 @@ package com.game.flappybird;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -35,11 +36,13 @@ public class Game extends ApplicationAdapter {
 	private float variation = 0;
 	private float gravity = 0;
 	private float initialYBirdPosition = 0;
+	private float birdXAxis;
 	private float pipeXAxis;
 	private float pipeYAxis;
 	private float pipeGap;
 	private Random random;
 	private int score = 0;
+	private int maxScore = 0;
 	private boolean passedPipe = false;
 	private int gameStatus;
 
@@ -52,6 +55,9 @@ public class Game extends ApplicationAdapter {
 	Sound flySound;
 	Sound collisionSound;
 	Sound scoreSound;
+
+	// Salvar pontuação
+	Preferences preferences;
 
 	@Override
 	public void create () {
@@ -99,11 +105,24 @@ public class Game extends ApplicationAdapter {
 
 			gravity ++;
 		} else if (gameStatus == 2) {
+//			if (initialYBirdPosition > 0 || touchScreen) {
+//				initialYBirdPosition = initialYBirdPosition - gravity;
+//				gravity++;
+//			}
+
+			if (score > maxScore) {
+				maxScore = score;
+				preferences.putInteger("maxScore", maxScore);
+			}
+
+			birdXAxis -= Gdx.graphics.getDeltaTime() * 500;
+
 			// Aplicando o evento de toque.
 			if (touchScreen) {
 				gameStatus = 0 ;
 				score = 0;
 				gravity = 0;
+				birdXAxis = 0;
 				initialYBirdPosition = deviceHeight / 2;
 				pipeXAxis = deviceWidth;
 			}
@@ -113,7 +132,7 @@ public class Game extends ApplicationAdapter {
 	private void detectCollisions() {
 
 		birdCircle.set(
-				50 + birds[0].getWidth()/(float) 2,
+				50 + birdXAxis + birds[0].getWidth()/(float) 2,
 				initialYBirdPosition + birds[0].getHeight()/(float) 2,
 				birds[0].getWidth()/(float) 2
 		);
@@ -138,9 +157,8 @@ public class Game extends ApplicationAdapter {
 		if (topPipeCollision || bottomPipeCollision) {
 			if (gameStatus == 1) {
 				collisionSound.play();
+				gameStatus = 2;
 			}
-
-			gameStatus = 2;
 		}
 	}
 
@@ -163,7 +181,7 @@ public class Game extends ApplicationAdapter {
 		batch.begin();
 
 		batch.draw(background, 0, 0, deviceWidth, deviceHeight);
-		batch.draw(birds[(int) variation], 50, initialYBirdPosition);
+		batch.draw(birds[(int) variation], 50 + birdXAxis, initialYBirdPosition);
 		batch.draw(bottomPipe, pipeXAxis, deviceHeight / 2 - bottomPipe.getHeight() - pipeGap / 2 + pipeYAxis);
 		batch.draw(topPipe, pipeXAxis, deviceHeight / 2 + pipeGap / 2 + pipeYAxis);
 		textScore.draw(batch, String.valueOf(score),deviceWidth / 2, deviceHeight - 110);
@@ -171,7 +189,7 @@ public class Game extends ApplicationAdapter {
 		if (gameStatus == 2) {
 			batch.draw(gameOver, deviceWidth / 2 - gameOver.getWidth() /(float) 2, deviceHeight / 2);
 			textRestart.draw(batch, "Toque para reiniciar!", deviceWidth / 2 - 200, deviceHeight / 2 - gameOver.getHeight() / (float) 2);
-			textBestScore.draw(batch, "Seu record é: 0 pontos", deviceWidth / 2 - 200, deviceHeight / 2 - gameOver.getHeight());
+			textBestScore.draw(batch, "Seu record é: " + maxScore + " pontos", deviceWidth / 2 - 200, deviceHeight / 2 - gameOver.getHeight());
 		}
 
 		batch.end();
@@ -224,6 +242,10 @@ public class Game extends ApplicationAdapter {
 		flySound = Gdx.audio.newSound(Gdx.files.internal("som_asa.wav"));
 		collisionSound = Gdx.audio.newSound(Gdx.files.internal("som_batida.wav"));
 		scoreSound = Gdx.audio.newSound(Gdx.files.internal("som_pontos.wav"));
+
+		// Configs de preferencias
+		preferences = Gdx.app.getPreferences("flappyBird");
+		maxScore = preferences.getInteger("maxScore", 0);
 	}
 
 	@Override
