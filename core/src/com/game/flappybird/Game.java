@@ -90,9 +90,16 @@ public class Game extends ApplicationAdapter {
 			}
 
 			gravity ++;
+		} else if (gameStatus == 2) {
+			// Aplicando o evento de toque.
+			if (touchScreen) {
+				gameStatus = 0 ;
+				score = 0;
+				gravity = 0;
+				initialYBirdPosition = deviceHeight / 2;
+				pipeXAxis = deviceWidth;
+			}
 		}
-//		else if (gameStatus == 2) {
-//		}
 	}
 
 	private void detectCollisions() {
