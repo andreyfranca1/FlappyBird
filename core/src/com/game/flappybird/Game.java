@@ -2,7 +2,9 @@ package com.game.flappybird;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
@@ -26,6 +28,11 @@ public class Game extends ApplicationAdapter {
 	private float pipeYAxis;
 	private float pipeGap;
 	private Random random;
+	private int points = 0;
+	private boolean passedPipe = false;
+
+	// Exibição de texto
+	BitmapFont textPoints;
 
 	@Override
 	public void create () {
@@ -36,6 +43,7 @@ public class Game extends ApplicationAdapter {
 	@Override
 	public void render () {
 		verifyGameStatus();
+		checkPoints();
 		drawTextures();
 	}
 
@@ -45,6 +53,7 @@ public class Game extends ApplicationAdapter {
 		if (pipeXAxis < -topPipe.getWidth()) {
 			pipeXAxis = deviceWidth;
 			pipeYAxis = random.nextInt(800) - 400;
+			passedPipe = false;
 		}
 
 		// Aplicando o evento de toque.
@@ -59,7 +68,6 @@ public class Game extends ApplicationAdapter {
 			initialBirdPositionY = initialBirdPositionY - gravity;
 		}
 
-
 		variation += Gdx.graphics.getDeltaTime() * 5;
 		// Verificação de variação para movimento das asas do pássaro
 		if (variation > 3)
@@ -68,13 +76,23 @@ public class Game extends ApplicationAdapter {
 		gravity ++;
 	}
 
+	public void checkPoints() {
+		if (pipeXAxis < (50 - birds[0].getWidth())) {
+			if (!passedPipe) {
+				points++;
+				passedPipe = true;
+			}
+		}
+	}
+
 	private void drawTextures() {
 		batch.begin();
 
 		batch.draw(background, 0, 0, deviceWidth, deviceHeight);
-		batch.draw(birds[(int) variation], 30, initialBirdPositionY);
+		batch.draw(birds[(int) variation], 50, initialBirdPositionY);
 		batch.draw(bottomPipe, pipeXAxis, deviceHeight / 2 - bottomPipe.getHeight() - pipeGap / 2 + pipeYAxis);
 		batch.draw(topPipe, pipeXAxis, deviceHeight / 2 + pipeGap / 2 + pipeYAxis);
+		textPoints.draw(batch, String.valueOf(points),deviceWidth / 2, deviceHeight - 110);
 
 		batch.end();
 	}
@@ -100,6 +118,11 @@ public class Game extends ApplicationAdapter {
 		initialBirdPositionY = deviceHeight / 2;
 		pipeXAxis = deviceWidth;
 		pipeGap = 225;
+
+		// Textos configs
+		textPoints = new BitmapFont();
+		textPoints.setColor(Color.WHITE);
+		textPoints.getData().setScale(10);
 	}
 
 	@Override
