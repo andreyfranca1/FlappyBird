@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -13,6 +15,8 @@ import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.Random;
 
@@ -59,6 +63,13 @@ public class Game extends ApplicationAdapter {
 	// Salvar pontuação
 	Preferences preferences;
 
+	// Objetos para camera
+	private OrthographicCamera camera;
+	private Viewport viewport;
+	private final float VIRTUAL_HEIGHT = 1280;
+	private final float VIRTUAL_WIDTH = 720;
+
+
 	@Override
 	public void create () {
 		initTextures();
@@ -67,6 +78,9 @@ public class Game extends ApplicationAdapter {
 
 	@Override
 	public void render () {
+		// Limpar frames Anteriores
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
 		verifyGameStatus();
 		checkScore();
 		drawTextures();
@@ -79,14 +93,14 @@ public class Game extends ApplicationAdapter {
 		if (gameStatus == 0) {
 			// Aplicando o evento de toque.
 			if (touchScreen) {
-				gravity = -15;
+				gravity = -8;
 				gameStatus = 1;
 				flySound.play();
 			}
 		} else if (gameStatus == 1) {
 			// Aplicando o evento de toque.
 			if (touchScreen) {
-				gravity = -15;
+				gravity = -8;
 				flySound.play();
 			}
 
@@ -94,7 +108,7 @@ public class Game extends ApplicationAdapter {
 			pipeXAxis -= Gdx.graphics.getDeltaTime() * 300;
 			if (pipeXAxis < -topPipe.getWidth()) {
 				pipeXAxis = deviceWidth;
-				pipeYAxis = random.nextInt(400) - 200;
+				pipeYAxis = random.nextInt(600) - 300;
 				passedPipe = false;
 			}
 
@@ -103,7 +117,7 @@ public class Game extends ApplicationAdapter {
 				initialYBirdPosition = initialYBirdPosition - gravity;
 			}
 
-			gravity ++;
+			gravity += 0.3;
 		} else if (gameStatus == 2) {
 //			if (initialYBirdPosition > 0 || touchScreen) {
 //				initialYBirdPosition = initialYBirdPosition - gravity;
@@ -178,6 +192,8 @@ public class Game extends ApplicationAdapter {
 	}
 
 	private void drawTextures() {
+		batch.setProjectionMatrix(camera.combined);
+
 		batch.begin();
 
 		batch.draw(background, 0, 0, deviceWidth, deviceHeight);
@@ -213,8 +229,8 @@ public class Game extends ApplicationAdapter {
 		batch = new SpriteBatch();
 		random = new Random();
 
-		deviceHeight = Gdx.graphics.getHeight();
-		deviceWidth = Gdx.graphics.getWidth();
+		deviceHeight = VIRTUAL_HEIGHT;
+		deviceWidth = VIRTUAL_WIDTH;
 		initialYBirdPosition = deviceHeight / 2;
 		pipeXAxis = deviceWidth;
 		pipeGap = 225;
@@ -246,10 +262,19 @@ public class Game extends ApplicationAdapter {
 		// Configs de preferencias
 		preferences = Gdx.app.getPreferences("flappyBird");
 		maxScore = preferences.getInteger("maxScore", 0);
+
+		// Configs Camera
+		camera = new OrthographicCamera();
+		camera.position.set(VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2, 0);
+		viewport = new StretchViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
+	}
+
+	public void resize(int width, int height) {
+		viewport.update(width, height);
 	}
 
 	@Override
 	public void dispose () {
-		Gdx.app.log("dispose", "Descarte Conteudo");
+
 	}
 }
