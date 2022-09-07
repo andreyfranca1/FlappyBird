@@ -23,7 +23,6 @@ public class Game extends ApplicationAdapter {
 	private Texture bottomPipe;
 
 	// Formas para colisão
-	private ShapeRenderer shapeRenderer;
 	private Circle birdCircle;
 	private Rectangle topPipeRectangle;
 	private Rectangle bottomPipeRectangle;
@@ -40,6 +39,7 @@ public class Game extends ApplicationAdapter {
 	private Random random;
 	private int score = 0;
 	private boolean passedPipe = false;
+	private int gameStatus;
 
 	// Exibição de texto
 	BitmapFont textScore;
@@ -59,32 +59,37 @@ public class Game extends ApplicationAdapter {
 	}
 
 	private void verifyGameStatus() {
-		// Movimento dos canos
-		pipeXAxis -= Gdx.graphics.getDeltaTime() * 300;
-		if (pipeXAxis < -topPipe.getWidth()) {
-			pipeXAxis = deviceWidth;
-			pipeYAxis = random.nextInt(800) - 400;
-			passedPipe = false;
-		}
-
-		// Aplicando o evento de toque.
 		boolean touchScreen = Gdx.input.justTouched();
 
-		if (touchScreen) {
-			gravity = -15;
+		if (gameStatus == 0) {
+			// Aplicando o evento de toque.
+			if (touchScreen) {
+				gravity = -15;
+				gameStatus = 1;
+			}
+		} else if (gameStatus == 1) {
+			// Aplicando o evento de toque.
+			if (touchScreen) {
+				gravity = -15;
+			}
+
+			// Movimento dos canos
+			pipeXAxis -= Gdx.graphics.getDeltaTime() * 300;
+			if (pipeXAxis < -topPipe.getWidth()) {
+				pipeXAxis = deviceWidth;
+				pipeYAxis = random.nextInt(400) - 200;
+				passedPipe = false;
+			}
+
+			// Aplicando a gravidade.
+			if (initialYBirdPosition > 0 || touchScreen) {
+				initialYBirdPosition = initialYBirdPosition - gravity;
+			}
+
+			gravity ++;
+		} else if (gameStatus == 2) {
+			Gdx.app.log("Fim", "Game Over");
 		}
-
-		// Aplicando a gravidade.
-		if (initialYBirdPosition > 0 || touchScreen) {
-			initialYBirdPosition = initialYBirdPosition - gravity;
-		}
-
-		variation += Gdx.graphics.getDeltaTime() * 5;
-		// Verificação de variação para movimento das asas do pássaro
-		if (variation > 3)
-			variation = 0;
-
-		gravity ++;
 	}
 
 	private void detectCollisions() {
@@ -114,6 +119,7 @@ public class Game extends ApplicationAdapter {
 
 		if (topPipeCollision || bottomPipeCollision) {
 			Gdx.app.log("LOG", "Colidiu");
+//			gameStatus = 2;
 		}
 	}
 
@@ -124,6 +130,11 @@ public class Game extends ApplicationAdapter {
 				passedPipe = true;
 			}
 		}
+
+		variation += Gdx.graphics.getDeltaTime() * 5;
+		// Verificação de variação para movimento das asas do pássaro
+		if (variation > 3)
+			variation = 0;
 	}
 
 	private void drawTextures() {
@@ -166,7 +177,6 @@ public class Game extends ApplicationAdapter {
 		textScore.getData().setScale(10);
 
 		// Formas Geométricas de colisão
-		shapeRenderer = new ShapeRenderer();
 		birdCircle = new Circle();
 		topPipeRectangle = new Rectangle();
 		bottomPipeRectangle = new Rectangle();
