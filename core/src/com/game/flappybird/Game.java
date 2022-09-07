@@ -18,6 +18,8 @@ public class Game extends ApplicationAdapter {
 	private float deviceWidth;
 	private float deviceHeight;
 	private float variation = 0;
+	private float gravity = 0;
+	private float initialBirdPositionY = 0;
 
 	@Override
 	public void create () {
@@ -32,6 +34,7 @@ public class Game extends ApplicationAdapter {
 
 		deviceHeight = Gdx.graphics.getHeight();
 		deviceWidth = Gdx.graphics.getWidth();
+		initialBirdPositionY = deviceHeight / 2;
 	}
 
 	@Override
@@ -41,10 +44,24 @@ public class Game extends ApplicationAdapter {
 		if (variation > 3)
 			variation = 0;
 
+		// Aplicando o evento de toque.
+		boolean touchScreen = Gdx.input.justTouched();
+
+		if (touchScreen) {
+			gravity = -15;
+		}
+
+		// Aplicando a gravidade.
+		if (initialBirdPositionY > 0 || touchScreen) {
+			initialBirdPositionY = initialBirdPositionY - gravity;
+		}
+
 		batch.draw(background, 0, 0, deviceWidth, deviceHeight);
-		batch.draw(birds[(int) variation], 30, deviceHeight / 2);
+		batch.draw(birds[(int) variation], 30, initialBirdPositionY);
 
 		variation += Gdx.graphics.getDeltaTime() * 5;
+
+		gravity ++;
 		xAxis++;
 		yAxis++;
 
