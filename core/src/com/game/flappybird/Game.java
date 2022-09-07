@@ -2,6 +2,7 @@ package com.game.flappybird;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -47,6 +48,11 @@ public class Game extends ApplicationAdapter {
 	BitmapFont textRestart;
 	BitmapFont textBestScore;
 
+	// Configurações de som
+	Sound flySound;
+	Sound collisionSound;
+	Sound scoreSound;
+
 	@Override
 	public void create () {
 		initTextures();
@@ -69,11 +75,13 @@ public class Game extends ApplicationAdapter {
 			if (touchScreen) {
 				gravity = -15;
 				gameStatus = 1;
+				flySound.play();
 			}
 		} else if (gameStatus == 1) {
 			// Aplicando o evento de toque.
 			if (touchScreen) {
 				gravity = -15;
+				flySound.play();
 			}
 
 			// Movimento dos canos
@@ -128,6 +136,10 @@ public class Game extends ApplicationAdapter {
 
 
 		if (topPipeCollision || bottomPipeCollision) {
+			if (gameStatus == 1) {
+				collisionSound.play();
+			}
+
 			gameStatus = 2;
 		}
 	}
@@ -137,6 +149,7 @@ public class Game extends ApplicationAdapter {
 			if (!passedPipe) {
 				score++;
 				passedPipe = true;
+				scoreSound.play();
 			}
 		}
 
@@ -207,6 +220,10 @@ public class Game extends ApplicationAdapter {
 		topPipeRectangle = new Rectangle();
 		bottomPipeRectangle = new Rectangle();
 
+		// Sons
+		flySound = Gdx.audio.newSound(Gdx.files.internal("som_asa.wav"));
+		collisionSound = Gdx.audio.newSound(Gdx.files.internal("som_batida.wav"));
+		scoreSound = Gdx.audio.newSound(Gdx.files.internal("som_pontos.wav"));
 	}
 
 	@Override
