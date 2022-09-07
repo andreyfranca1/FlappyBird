@@ -21,6 +21,7 @@ public class Game extends ApplicationAdapter {
 	private Texture background;
 	private Texture topPipe;
 	private Texture bottomPipe;
+	private Texture gameOver;
 
 	// Formas para colisão
 	private Circle birdCircle;
@@ -43,6 +44,8 @@ public class Game extends ApplicationAdapter {
 
 	// Exibição de texto
 	BitmapFont textScore;
+	BitmapFont textRestart;
+	BitmapFont textBestScore;
 
 	@Override
 	public void create () {
@@ -87,9 +90,9 @@ public class Game extends ApplicationAdapter {
 			}
 
 			gravity ++;
-		} else if (gameStatus == 2) {
-			Gdx.app.log("Fim", "Game Over");
 		}
+//		else if (gameStatus == 2) {
+//		}
 	}
 
 	private void detectCollisions() {
@@ -118,8 +121,7 @@ public class Game extends ApplicationAdapter {
 
 
 		if (topPipeCollision || bottomPipeCollision) {
-			Gdx.app.log("LOG", "Colidiu");
-//			gameStatus = 2;
+			gameStatus = 2;
 		}
 	}
 
@@ -146,6 +148,12 @@ public class Game extends ApplicationAdapter {
 		batch.draw(topPipe, pipeXAxis, deviceHeight / 2 + pipeGap / 2 + pipeYAxis);
 		textScore.draw(batch, String.valueOf(score),deviceWidth / 2, deviceHeight - 110);
 
+		if (gameStatus == 2) {
+			batch.draw(gameOver, deviceWidth / 2 - gameOver.getWidth() /(float) 2, deviceHeight / 2);
+			textRestart.draw(batch, "Toque para reiniciar!", deviceWidth / 2 - 200, deviceHeight / 2 - gameOver.getHeight() / (float) 2);
+			textBestScore.draw(batch, "Seu record é: 0 pontos", deviceWidth / 2 - 200, deviceHeight / 2 - gameOver.getHeight());
+		}
+
 		batch.end();
 	}
 
@@ -159,6 +167,8 @@ public class Game extends ApplicationAdapter {
 
 		topPipe = new Texture("cano_topo_maior.png");
 		bottomPipe = new Texture("cano_baixo_maior.png");
+
+		gameOver = new Texture("game_over.png");
 	}
 
 	private void initObjects() {
@@ -175,6 +185,15 @@ public class Game extends ApplicationAdapter {
 		textScore = new BitmapFont();
 		textScore.setColor(Color.WHITE);
 		textScore.getData().setScale(10);
+
+		textRestart = new BitmapFont();
+		textRestart.setColor(Color.GREEN);
+		textRestart.getData().setScale(3);
+
+		textBestScore = new BitmapFont();
+		textBestScore.setColor(Color.RED);
+		textBestScore.getData().setScale(3);
+
 
 		// Formas Geométricas de colisão
 		birdCircle = new Circle();
