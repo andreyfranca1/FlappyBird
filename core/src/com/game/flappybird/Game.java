@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
 
@@ -87,12 +88,33 @@ public class Game extends ApplicationAdapter {
 	}
 
 	private void detectCollisions() {
-		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-		shapeRenderer.circle(50,initialYBirdPosition, birds[0].getWidth()/(float) 2);
-		shapeRenderer.setColor(Color.RED);
+		birdCircle.set(
+				50 + birds[0].getWidth()/(float) 2,
+				initialYBirdPosition + birds[0].getHeight()/(float) 2,
+				birds[0].getWidth()/(float) 2
+		);
 
-		shapeRenderer.end();
+		topPipeRectangle.set(
+				pipeXAxis,
+				deviceHeight / 2 + pipeGap / 2 + pipeYAxis,
+				topPipe.getWidth(),
+				topPipe.getHeight()
+		);
+
+		bottomPipeRectangle.set(
+				pipeXAxis,
+				deviceHeight / 2 - bottomPipe.getHeight() - pipeGap / 2 + pipeYAxis,
+				bottomPipe.getWidth(),
+				bottomPipe.getHeight()
+		);
+		boolean topPipeCollision = Intersector.overlaps(birdCircle, topPipeRectangle);
+		boolean bottomPipeCollision = Intersector.overlaps(birdCircle, bottomPipeRectangle);
+
+
+		if (topPipeCollision || bottomPipeCollision) {
+			Gdx.app.log("LOG", "Colidiu");
+		}
 	}
 
 	public void checkScore() {
